@@ -1,0 +1,26 @@
+{
+  "index.qmd": {
+    "index.html": "83fb3c9b"
+  },
+  "01_processing_status.qmd": {
+    "01_processing_status.html": "a4c69169"
+  },
+  "02_global_trends.qmd": {
+    "02_global_trends.html": "349d1214"
+  },
+  "00_methodological_framework.qmd": {
+    "00_methodological_framework.html": "3bae9b6a"
+  },
+  "03_country_drivers.qmd": {
+    "03_country_drivers.html": "3aaf7096"
+  },
+  "04_commodity_drivers.qmd": {
+    "04_commodity_drivers.html": "2e1bfbce"
+  },
+  "06_regional_regressions.qmd": {
+    "06_regional_regressions.html": "5d0f7b7f"
+  },
+  "05_maps.qmd": {
+    "05_maps.html": "3c47519b"
+  }
+}

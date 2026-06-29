@@ -1,0 +1,31 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "BF-NEE Diagnostics"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Overview
+      - href: 00_methodological_framework.qmd
+        text: Method
+      - href: 01_processing_status.qmd
+        text: Processing status
+      - href: 02_global_trends.qmd
+        text: Global trends
+      - href: 03_country_drivers.qmd
+        text: Country drivers
+      - href: 04_commodity_drivers.qmd
+        text: Commodity drivers
+      - href: 05_maps.qmd
+        text: Maps
+      - href: 06_regional_regressions.qmd
+        text: Regional regressions
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-fold: true
+    code-tools: true

@@ -1,0 +1,48 @@
+---
+title: "BF-NEE Diagnostics"
+---
+
+# Biodiversity Footprint of Natural Ecosystem Extent (BF-NEE)
+
+This website provides exploratory analyses and diagnostic checks for the BF-NEE indicator.
+
+The indicator links agricultural land expansion from LandSHIFT with ecosystem extent information from GlobES and attributes resulting ecosystem loss to commodity consumption.
+
+## Objectives
+
+The diagnostics focus on:
+
+- Global BF-NEE trends over time
+- Main drivers of the global footprint
+- Germany's contribution to natural ecosystem displacement
+- Spatial hotspot analysis
+- Consistency checks between BF-NEE and GlobES ecosystem loss
+- Data quality and processing diagnostics
+
+## Available analyses
+
+### Processing status
+
+Country-level diagnostics and identification of outputs that were generated using outdated scaling assumptions.
+
+### Global trends
+
+Development of BF-NEE between 1995 and 2015.
+
+### Country drivers
+
+Identification of countries contributing most strongly to global BF-NEE.
+
+### Commodity drivers
+
+Identification of agricultural commodities contributing most strongly to ecosystem displacement.
+
+### Maps
+
+Spatial distribution of BF-NEE and natural ecosystem loss.
+
+## Current status
+
+Analyses currently use only countries that passed the processing and scale diagnostics.
+
+Countries that still contain outputs generated prior to the cell-area correction are excluded until recalculated.

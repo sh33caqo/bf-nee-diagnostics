@@ -1,0 +1,184 @@
+---
+title: "Country drivers"
+---
+
+```{r}
+library(dplyr)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(DT)
+
+dir_diag <- "~/Symobio/Data/Processed/BF_NEE_Diagnostics"
+
+diag <- read_csv(
+  file.path(dir_diag, "bfnee_country_diagnostics_all_transitions.csv"),
+  show_col_types = FALSE
+)
+
+valid <- read_csv(
+  file.path(dir_diag, "bfnee_valid_countries.csv"),
+  show_col_types = FALSE
+)
+
+valid_iso3 <- valid %>%
+  filter(valid_for_analysis) %>%
+  pull(iso3)
+```
+
+# Country contributions to global BF-NEE
+
+```{r}
+country_trend <- diag %>%
+  filter(
+    iso3 %in% valid_iso3,
+    status == "ok",
+    suspicious_old_scale == FALSE
+  ) %>%
+  group_by(iso3, year, transition) %>%
+  summarise(
+    bfnee_km2 = sum(bfnee_sum_km2, na.rm = TRUE),
+    natural_loss_km2 = sum(natural_loss_sum_km2, na.rm = TRUE),
+    weight_sum = mean(weight_sum, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+global_by_year <- country_trend %>%
+  group_by(year, transition) %>%
+  summarise(
+    global_bfnee_km2 = sum(bfnee_km2, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+country_trend <- country_trend %>%
+  left_join(global_by_year, by = c("year", "transition")) %>%
+  mutate(
+    share_global_bfnee = bfnee_km2 / global_bfnee_km2
+  )
+```
+
+# Top countries by period
+
+```{r}
+top_countries_by_period <- country_trend %>%
+  group_by(year, transition) %>%
+  slice_max(bfnee_km2, n = 15, with_ties = FALSE) %>%
+  ungroup()
+
+ggplot(
+  top_countries_by_period,
+  aes(
+    x = reorder(iso3, bfnee_km2),
+    y = bfnee_km2
+  )
+) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ transition, scales = "free_y") +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Top BF-NEE countries by transition",
+    subtitle = "Validated countries only",
+    x = "Country",
+    y = "BF-NEE (km²)"
+  ) +
+  theme_minimal()
+```
+
+# Top countries in latest period
+
+```{r}
+latest_year <- max(country_trend$year, na.rm = TRUE)
+
+top_latest <- country_trend %>%
+  filter(year == latest_year) %>%
+  arrange(desc(bfnee_km2)) %>%
+  slice_head(n = 20)
+
+ggplot(
+  top_latest,
+  aes(
+    x = reorder(iso3, bfnee_km2),
+    y = bfnee_km2
+  )
+) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = paste("Top BF-NEE countries in", latest_year),
+    subtitle = "Validated countries only",
+    x = "Country",
+    y = "BF-NEE (km²)"
+  ) +
+  theme_minimal()
+```
+
+# Share of global BF-NEE
+
+```{r}
+ggplot(
+  top_latest,
+  aes(
+    x = reorder(iso3, share_global_bfnee),
+    y = share_global_bfnee
+  )
+) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(
+    title = paste("Share of global BF-NEE in", latest_year),
+    subtitle = "Top 20 countries, validated countries only",
+    x = "Country",
+    y = "Share of global BF-NEE"
+  ) +
+  theme_minimal()
+```
+
+# Country trajectories
+
+```{r}
+top_overall <- country_trend %>%
+  group_by(iso3) %>%
+  summarise(
+    total_bfnee_km2 = sum(bfnee_km2, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  slice_max(total_bfnee_km2, n = 10, with_ties = FALSE) %>%
+  pull(iso3)
+
+ggplot(
+  country_trend %>% filter(iso3 %in% top_overall),
+  aes(
+    x = year,
+    y = bfnee_km2,
+    group = iso3,
+    linetype = iso3
+  )
+) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "BF-NEE trajectories for top countries",
+    subtitle = "Top 10 countries by total BF-NEE across all periods",
+    x = "Year",
+    y = "BF-NEE (km²)",
+    linetype = "Country"
+  ) +
+  theme_minimal()
+```
+
+
+
+# Diagnostic table
+
+```{r}
+datatable(
+  country_trend %>%
+    arrange(desc(bfnee_km2)),
+  options = list(pageLength = 25)
+)
+```

@@ -1,0 +1,212 @@
+---
+title: "Methodological framework"
+---
+
+```{r}
+library(dplyr)
+library(tibble)
+library(knitr)
+```
+
+# Indicator overview
+
+BF-NEE measures natural ecosystem area loss associated with agricultural land expansion and attributes this loss to commodity consumption.
+
+The indicator combines:
+
+1. LandSHIFT agricultural land-use information
+2. GlobES ecosystem extent information
+3. Commodity-specific consumption shares
+4. GLORIA production attribution shares
+
+# Spatial and temporal setup
+
+```{r}
+years <- c(1995, 2000, 2005, 2010, 2015)
+
+transitions <- tibble(
+  transition = c(
+    "1995_2000",
+    "2000_2005",
+    "2005_2010",
+    "2010_2015"
+  ),
+  attributed_to_year = c(
+    2000,
+    2005,
+    2010,
+    2015
+  )
+)
+
+kable(transitions)
+```
+
+# GlobES and LandSHIFT harmonisation
+
+Raw GlobES layers represent ecosystem cover by IUCN ecosystem class.
+
+In the workflow, GlobES ecosystem shares are first aligned to the LandSHIFT grid. Agricultural land from LandSHIFT is then used to adjust the GlobES ecosystem composition so that the agricultural share in GlobES matches LandSHIFT.
+
+# Agricultural / non-natural target classes
+
+LandSHIFT agricultural area is coupled to the following GlobES/IUCN ecosystem classes:
+
+```{r}
+ag_classes <- tibble(
+  iucn_code = c("14.1", "15.8"),
+  role = c(
+    "Agricultural target class",
+    "Agricultural target class"
+  ),
+  interpretation = c(
+    "Used to receive LandSHIFT agricultural area",
+    "Used to receive LandSHIFT agricultural area"
+  )
+)
+
+kable(ag_classes)
+```
+
+# Excluded non-natural classes
+
+Before the agricultural adjustment, selected non-natural or artificial classes are removed and the remaining ecosystem shares are renormalized.
+
+```{r}
+excluded_classes <- tibble(
+  iucn_code = c(
+    "14.4",
+    "14.5",
+    "15.4",
+    "15.5",
+    "15.6",
+    "15.11"
+  ),
+  treatment = "Excluded before renormalization",
+  interpretation = "Not considered part of the natural ecosystem pool"
+)
+
+kable(excluded_classes)
+```
+
+# Operational definition of natural ecosystems
+
+In the BF-NEE workflow, natural ecosystems are defined operationally as:
+
+> All GlobES/IUCN ecosystem classes remaining after excluding the specified non-natural classes, with agricultural classes handled separately through LandSHIFT adjustment.
+
+More specifically:
+
+- agricultural classes: `14.1`, `15.8`
+- excluded non-natural classes: `14.4`, `14.5`, `15.4`, `15.5`, `15.6`, `15.11`
+- natural ecosystem loss is calculated from the remaining natural ecosystem classes
+
+# Ecosystem adjustment procedure
+
+The adjustment proceeds in three steps.
+
+## Step 1: Remove excluded classes
+
+The excluded classes are set to zero.
+
+The remaining ecosystem shares are renormalized so that the non-excluded classes sum to one.
+
+## Step 2: Match agriculture to LandSHIFT
+
+The total GlobES agricultural share is calculated as the sum of classes `14.1` and `15.8`.
+
+This agricultural share is replaced by the LandSHIFT agricultural share.
+
+## Step 3: Rescale remaining ecosystems
+
+All non-agricultural ecosystem classes are rescaled so that the full ecosystem composition again sums to one.
+
+# Area calculation
+
+For each grid cell, ecosystem-class area is calculated as:
+
+\[
+A_{p,e,y}
+=
+share_{p,e,y}
+\times
+cellArea_p
+\]
+
+where:
+
+- \(A_{p,e,y}\) is the area of ecosystem class \(e\) in pixel \(p\) and year \(y\)
+- \(share_{p,e,y}\) is the adjusted ecosystem share
+- \(cellArea_p\) is the LandSHIFT cell area in km²
+
+# Natural ecosystem loss
+
+Change in ecosystem extent is calculated between consecutive time steps:
+
+\[
+dA_{p,e,t}
+=
+A_{p,e,t}
+-
+A_{p,e,t-1}
+\]
+
+Only losses of natural ecosystems are retained:
+
+\[
+lossA_{p,e,t}
+=
+max(-dA_{p,e,t}, 0)
+\]
+
+The total natural ecosystem loss in a pixel is:
+
+\[
+lossA_{p,t}
+=
+\sum_e lossA_{p,e,t}
+\]
+
+where the sum is taken over natural ecosystem classes.
+
+# Commodity attribution
+
+For each commodity, the attribution weight is calculated as:
+
+\[
+W_{c,r,y}
+=
+S_{c,r,y}
+\times
+P_{c,r,y}
+\]
+
+where:
+
+- \(S_{c,r,y}\) is the commodity share associated with consumption
+- \(P_{c,r,y}\) is the GLORIA production attribution share
+- \(W_{c,r,y}\) is the commodity-specific attribution weight
+
+# BF-NEE calculation
+
+Pixel-level BF-NEE is calculated as:
+
+\[
+BF\text{-}NEE_{p,t}
+=
+lossA_{p,t}
+\times
+\sum_c W_{c,r,y}
+\]
+
+The unit of BF-NEE is:
+
+\[
+km^2
+\]
+
+# Interpretation
+
+BF-NEE represents consumption-attributed natural ecosystem loss.
+
+A value of 10 km² means that, according to the attribution scheme, 10 km² of natural ecosystem loss in that location and transition period are associated with the considered consumption demand.

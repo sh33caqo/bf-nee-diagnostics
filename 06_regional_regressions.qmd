@@ -1,0 +1,282 @@
+---
+title: "Regional regressions"
+---
+
+```{r}
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(broom)
+library(DT)
+library(scales)
+
+df <- read_csv(
+  "data/bfnee_regression_dataset.csv",
+  show_col_types = FALSE
+)
+
+df_model <- df %>%
+  filter(
+    !is.na(continent),
+    !is.na(log_bfnee),
+    !is.na(log_natural_loss),
+    !is.na(log_weight_sum),
+    natural_loss_sum_km2 > 0,
+    bfnee_sum_km2 > 0
+  )
+```
+
+# Data coverage
+
+```{r}
+df_model %>%
+  distinct(continent, iso3) %>%
+  count(continent, name = "n_countries") %>%
+  arrange(continent)
+```
+
+```{r}
+df_model %>%
+  count(continent, year) %>%
+  arrange(continent, year)
+```
+
+# Model specification
+
+The first regional consistency model is:
+
+```text
+log(BF-NEE + 1) ~ log(natural ecosystem loss + 1) + log(weight sum + 1)
+```
+
+where `weight_sum` represents the aggregated commodity-consumption and production-attribution component.
+
+# BF-NEE and natural ecosystem loss
+
+```{r}
+ggplot(
+  df_model,
+  aes(
+    x = natural_loss_sum_km2,
+    y = bfnee_sum_km2
+  )
+) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ continent, scales = "free") +
+  scale_x_continuous(labels = comma) +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "BF-NEE vs natural ecosystem loss",
+    subtitle = "Validated countries only",
+    x = "Natural ecosystem loss (km²)",
+    y = "BF-NEE (km²)"
+  ) +
+  theme_minimal()
+```
+
+# Log-log relationship
+
+```{r}
+ggplot(
+  df_model,
+  aes(
+    x = log_natural_loss,
+    y = log_bfnee
+  )
+) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ continent, scales = "free") +
+  labs(
+    title = "Log-log relationship between BF-NEE and natural ecosystem loss",
+    subtitle = "Validated countries only",
+    x = "log(natural ecosystem loss + 1)",
+    y = "log(BF-NEE + 1)"
+  ) +
+  theme_minimal()
+```
+
+# Regional regression models
+
+```{r}
+fit_region <- function(x) {
+  lm(
+    log_bfnee ~ log_natural_loss + log_weight_sum,
+    data = x
+  )
+}
+
+regional_models <- df_model %>%
+  group_by(continent) %>%
+  group_modify(~ {
+    model <- fit_region(.x)
+    
+    tidy_model <- tidy(model)
+    glance_model <- glance(model)
+    
+    tidy_model %>%
+      mutate(
+        r_squared = glance_model$r.squared,
+        adj_r_squared = glance_model$adj.r.squared,
+        n_obs = glance_model$nobs
+      )
+  }) %>%
+  ungroup()
+
+regional_models
+```
+
+```{r}
+datatable(
+  regional_models %>%
+    arrange(continent, term),
+  options = list(pageLength = 25)
+)
+```
+
+# Coefficient comparison
+
+```{r}
+regional_coefficients <- regional_models %>%
+  filter(term != "(Intercept)")
+
+ggplot(
+  regional_coefficients,
+  aes(
+    x = continent,
+    y = estimate
+  )
+) +
+  geom_point(size = 2) +
+  geom_errorbar(
+    aes(
+      ymin = estimate - 1.96 * std.error,
+      ymax = estimate + 1.96 * std.error
+    ),
+    width = 0.15
+  ) +
+  facet_wrap(~ term, scales = "free_y") +
+  labs(
+    title = "Regional regression coefficients",
+    subtitle = "Error bars show approximate 95% confidence intervals",
+    x = "Region",
+    y = "Coefficient estimate"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1
+    )
+  )
+```
+
+# Model fit by region
+
+```{r}
+model_fit <- regional_models %>%
+  distinct(
+    continent,
+    r_squared,
+    adj_r_squared,
+    n_obs
+  )
+
+ggplot(
+  model_fit,
+  aes(
+    x = reorder(continent, r_squared),
+    y = r_squared
+  )
+) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Model fit by region",
+    x = "Region",
+    y = "R²"
+  ) +
+  theme_minimal()
+```
+
+# Residual diagnostics
+
+```{r}
+regional_augmented <- df_model %>%
+  group_by(continent) %>%
+  group_modify(~ {
+    model <- fit_region(.x)
+    augment(model, data = .x)
+  }) %>%
+  ungroup()
+```
+
+```{r}
+ggplot(
+  regional_augmented,
+  aes(
+    x = .fitted,
+    y = .resid
+  )
+) +
+  geom_point(alpha = 0.6) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  facet_wrap(~ continent, scales = "free") +
+  labs(
+    title = "Residual diagnostics by region",
+    x = "Fitted log(BF-NEE + 1)",
+    y = "Residual"
+  ) +
+  theme_minimal()
+```
+
+# Largest positive residuals
+
+Countries with large positive residuals have higher BF-NEE than expected from natural ecosystem loss and the aggregate attribution weight.
+
+```{r}
+regional_augmented %>%
+  arrange(desc(.resid)) %>%
+  select(
+    continent,
+    iso3,
+    country_name,
+    transition,
+    year,
+    bfnee_sum_km2,
+    natural_loss_sum_km2,
+    weight_sum,
+    .fitted,
+    .resid
+  ) %>%
+  head(30) %>%
+  datatable(
+    options = list(pageLength = 15)
+  )
+```
+
+# Largest negative residuals
+
+Countries with large negative residuals have lower BF-NEE than expected from natural ecosystem loss and the aggregate attribution weight.
+
+```{r}
+regional_augmented %>%
+  arrange(.resid) %>%
+  select(
+    continent,
+    iso3,
+    country_name,
+    transition,
+    year,
+    bfnee_sum_km2,
+    natural_loss_sum_km2,
+    weight_sum,
+    .fitted,
+    .resid
+  ) %>%
+  head(30) %>%
+  datatable(
+    options = list(pageLength = 15)
+  )
+```

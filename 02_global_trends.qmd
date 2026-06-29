@@ -1,0 +1,260 @@
+---
+title: "Global BF-NEE trends"
+---
+
+```{r}
+library(dplyr)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+
+dir_diag <- "~/Symobio/Data/Processed/BF_NEE_Diagnostics"
+
+diag <- read_csv(
+  file.path(
+    dir_diag,
+    "bfnee_country_diagnostics_all_transitions.csv"
+  ),
+  show_col_types = FALSE
+)
+
+valid <- read_csv(
+  file.path(
+    dir_diag,
+    "bfnee_valid_countries.csv"
+  ),
+  show_col_types = FALSE
+)
+
+valid_iso3 <- valid %>%
+  filter(valid_for_analysis) %>%
+  pull(iso3)
+```
+
+# Overview
+
+This page summarizes global BF-NEE trends based on countries that passed all processing and scale diagnostics.
+
+```{r}
+global_trend <- diag %>%
+  filter(
+    iso3 %in% valid_iso3,
+    status == "ok",
+    suspicious_old_scale == FALSE
+  ) %>%
+  group_by(year, transition) %>%
+  summarise(
+    global_bfnee_km2 =
+      sum(bfnee_sum_km2, na.rm = TRUE),
+
+    global_natural_loss_km2 =
+      sum(natural_loss_sum_km2, na.rm = TRUE),
+
+    n_countries =
+      n_distinct(iso3),
+
+    .groups = "drop"
+  ) %>%
+  arrange(year) %>%
+  mutate(
+    bfnee_index =
+      global_bfnee_km2 /
+      first(global_bfnee_km2) * 100,
+
+    natural_loss_index =
+      global_natural_loss_km2 /
+      first(global_natural_loss_km2) * 100,
+
+    bfnee_share_of_loss =
+      global_bfnee_km2 /
+      global_natural_loss_km2
+  )
+```
+
+# Global BF-NEE
+
+```{r}
+ggplot(
+  global_trend,
+  aes(
+    x = year,
+    y = global_bfnee_km2
+  )
+) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(
+    labels = comma
+  ) +
+  labs(
+    title = "Global BF-NEE",
+    subtitle = "Validated countries only",
+    x = "Year",
+    y = "BF-NEE (km²)"
+  ) +
+  theme_minimal()
+```
+
+# Global natural ecosystem loss
+
+```{r}
+ggplot(
+  global_trend,
+  aes(
+    x = year,
+    y = global_natural_loss_km2
+  )
+) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(
+    labels = comma
+  ) +
+  labs(
+    title = "Global natural ecosystem loss",
+    subtitle = "Validated countries only",
+    x = "Year",
+    y = "Natural ecosystem loss (km²)"
+  ) +
+  theme_minimal()
+```
+
+# Absolute comparison
+
+```{r}
+global_trend_long <- global_trend %>%
+  select(
+    year,
+    global_bfnee_km2,
+    global_natural_loss_km2
+  ) %>%
+  pivot_longer(
+    cols = c(
+      global_bfnee_km2,
+      global_natural_loss_km2
+    ),
+    names_to = "indicator",
+    values_to = "value_km2"
+  ) %>%
+  mutate(
+    indicator = recode(
+      indicator,
+      global_bfnee_km2 =
+        "BF-NEE",
+      global_natural_loss_km2 =
+        "Natural ecosystem loss"
+    )
+  )
+```
+
+```{r}
+ggplot(
+  global_trend_long,
+  aes(
+    x = year,
+    y = value_km2,
+    linetype = indicator
+  )
+) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(
+    labels = comma
+  ) +
+  labs(
+    title = "Absolute comparison",
+    subtitle = "Validated countries only",
+    x = "Year",
+    y = "Area (km²)",
+    linetype = "Indicator"
+  ) +
+  theme_minimal()
+```
+
+# Relative change (first period = 100)
+
+This figure compares rates of change only.
+
+Both indicators are normalized so that the first period equals 100.
+
+```{r}
+global_trend_index_long <- global_trend %>%
+  select(
+    year,
+    bfnee_index,
+    natural_loss_index
+  ) %>%
+  pivot_longer(
+    cols = c(
+      bfnee_index,
+      natural_loss_index
+    ),
+    names_to = "indicator",
+    values_to = "index"
+  ) %>%
+  mutate(
+    indicator = recode(
+      indicator,
+      bfnee_index =
+        "BF-NEE",
+      natural_loss_index =
+        "Natural ecosystem loss"
+    )
+  )
+```
+
+```{r}
+ggplot(
+  global_trend_index_long,
+  aes(
+    x = year,
+    y = index,
+    linetype = indicator
+  )
+) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Relative change in BF-NEE and natural ecosystem loss",
+    subtitle = "First period = 100",
+    x = "Year",
+    y = "Index",
+    linetype = "Indicator"
+  ) +
+  theme_minimal()
+```
+
+# BF-NEE share of natural ecosystem loss
+
+This figure shows the proportion of natural ecosystem loss represented by BF-NEE.
+
+```{r}
+ggplot(
+  global_trend,
+  aes(
+    x = year,
+    y = bfnee_share_of_loss
+  )
+) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(
+    labels = percent_format(
+      accuracy = 1
+    )
+  ) +
+  labs(
+    title = "BF-NEE as share of natural ecosystem loss",
+    subtitle = "Validated countries only",
+    x = "Year",
+    y = "BF-NEE / natural ecosystem loss"
+  ) +
+  theme_minimal()
+```
+
+# Diagnostic table
+
+```{r}
+global_trend
+```

@@ -1,0 +1,208 @@
+---
+title: "Commodity drivers"
+---
+
+```{r}
+library(dplyr)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(DT)
+
+dir_diag <- "~/Symobio/Data/Processed/BF_NEE_Diagnostics"
+dir_bf <- "~/Symobio/Data/Processed/BF_NEE_Countries"
+
+valid <- read_csv(
+  file.path(dir_diag, "bfnee_valid_countries.csv"),
+  show_col_types = FALSE
+)
+
+valid_iso3 <- valid %>%
+  filter(valid_for_analysis) %>%
+  pull(iso3)
+```
+
+# Load commodity-level BF-NEE
+
+```{r}
+read_commodity_bf <- function(iso3) {
+  
+  iso3_lower <- tolower(iso3)
+  dir_country <- file.path(dir_bf, iso3)
+  
+  files <- list.files(
+    dir_country,
+    pattern = paste0("^BF_NEE_by_commodity_", iso3_lower, "_.*\\.csv$"),
+    full.names = TRUE
+  )
+  
+  if (length(files) == 0) {
+    return(NULL)
+  }
+  
+  bind_rows(lapply(files, function(f) {
+    x <- read_csv(f, show_col_types = FALSE)
+    x$source_file <- basename(f)
+    x
+  }))
+}
+
+commodity_raw <- bind_rows(
+  lapply(valid_iso3, read_commodity_bf)
+)
+
+commodity_bf <- commodity_raw %>%
+  filter(!is.na(BF_NEE_commodity))
+```
+
+# Global commodity contributions
+
+```{r}
+commodity_global <- commodity_bf %>%
+  group_by(year, transition, commodity) %>%
+  summarise(
+    bfnee_km2 = sum(BF_NEE_commodity, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+commodity_global_total <- commodity_global %>%
+  group_by(year, transition) %>%
+  summarise(
+    global_bfnee_km2 = sum(bfnee_km2, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+commodity_global <- commodity_global %>%
+  left_join(
+    commodity_global_total,
+    by = c("year", "transition")
+  ) %>%
+  mutate(
+    share_global_bfnee = bfnee_km2 / global_bfnee_km2
+  )
+```
+
+# Top commodities by period
+
+```{r}
+top_commodities_by_period <- commodity_global %>%
+  group_by(year, transition) %>%
+  slice_max(bfnee_km2, n = 15, with_ties = FALSE) %>%
+  ungroup()
+
+ggplot(
+  top_commodities_by_period,
+  aes(
+    x = reorder(commodity, bfnee_km2),
+    y = bfnee_km2
+  )
+) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ transition, scales = "free_y") +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Top commodities by BF-NEE and transition",
+    subtitle = "Validated countries only",
+    x = "Commodity",
+    y = "BF-NEE (km²)"
+  ) +
+  theme_minimal()
+```
+
+# Top commodities in latest period
+
+```{r}
+latest_year <- max(commodity_global$year, na.rm = TRUE)
+
+top_latest <- commodity_global %>%
+  filter(year == latest_year) %>%
+  arrange(desc(bfnee_km2)) %>%
+  slice_head(n = 20)
+
+ggplot(
+  top_latest,
+  aes(
+    x = reorder(commodity, bfnee_km2),
+    y = bfnee_km2
+  )
+) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = paste("Top commodities in", latest_year),
+    subtitle = "Validated countries only",
+    x = "Commodity",
+    y = "BF-NEE (km²)"
+  ) +
+  theme_minimal()
+```
+
+# Commodity shares of global BF-NEE
+
+```{r}
+ggplot(
+  top_latest,
+  aes(
+    x = reorder(commodity, share_global_bfnee),
+    y = share_global_bfnee
+  )
+) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(
+    title = paste("Commodity share of global BF-NEE in", latest_year),
+    subtitle = "Top 20 commodities, validated countries only",
+    x = "Commodity",
+    y = "Share of global BF-NEE"
+  ) +
+  theme_minimal()
+```
+
+# Commodity trajectories
+
+```{r}
+top_overall <- commodity_global %>%
+  group_by(commodity) %>%
+  summarise(
+    total_bfnee_km2 = sum(bfnee_km2, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  slice_max(total_bfnee_km2, n = 10, with_ties = FALSE) %>%
+  pull(commodity)
+
+ggplot(
+  commodity_global %>% filter(commodity %in% top_overall),
+  aes(
+    x = year,
+    y = bfnee_km2,
+    group = commodity,
+    linetype = commodity
+  )
+) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "BF-NEE trajectories for top commodities",
+    subtitle = "Top 10 commodities by total BF-NEE across all periods",
+    x = "Year",
+    y = "BF-NEE (km²)",
+    linetype = "Commodity"
+  ) +
+  theme_minimal()
+```
+
+
+# Diagnostic table
+
+```{r}
+datatable(
+  commodity_global %>%
+    arrange(desc(bfnee_km2)),
+  options = list(pageLength = 25)
+)
+```

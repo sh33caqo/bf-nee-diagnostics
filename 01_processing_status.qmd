@@ -1,0 +1,80 @@
+---
+title: "Processing status and scale diagnostics"
+---
+
+```{r}
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(DT)
+
+dir_diag <- "~/Symobio/Data/Processed/BF_NEE_Diagnostics"
+
+diag <- read_csv(
+  file.path(dir_diag, "bfnee_country_diagnostics_all_transitions.csv"),
+  show_col_types = FALSE
+)
+
+valid <- read_csv(
+  file.path(dir_diag, "bfnee_valid_countries.csv"),
+  show_col_types = FALSE
+)
+```
+
+# Summary
+
+```{r}
+valid %>%
+  count(valid_for_analysis)
+```
+
+```{r}
+ggplot(valid, aes(x = valid_for_analysis)) +
+  geom_bar() +
+  labs(
+    title = "Countries passing BF-NEE diagnostics",
+    x = "Valid for analysis",
+    y = "Number of countries"
+  ) +
+  theme_minimal()
+```
+
+# Old-scale outputs by transition
+
+```{r}
+scale_summary <- diag %>%
+  count(transition, suspicious_old_scale)
+
+scale_summary
+```
+
+```{r}
+ggplot(scale_summary, aes(x = transition, y = n, fill = suspicious_old_scale)) +
+  geom_col() +
+  labs(
+    title = "Suspicious old-scale outputs by transition",
+    x = "Transition",
+    y = "Number of country-transition outputs",
+    fill = "Old scale?"
+  ) +
+  theme_minimal()
+```
+
+# Countries excluded from analysis
+
+```{r}
+excluded <- valid %>%
+  filter(!valid_for_analysis)
+
+datatable(excluded)
+```
+
+# Diagnostic table
+
+```{r}
+datatable(
+  diag %>%
+    arrange(desc(suspicious_old_scale), iso3, transition),
+  options = list(pageLength = 25)
+)
+```
