@@ -4,28 +4,101 @@ project:
 
 website:
   title: "BF-NEE Diagnostics"
+
+  page-navigation: true
+
   navbar:
+    background: primary
+    foreground: light
+    pinned: true
+
     left:
       - href: index.qmd
         text: Overview
+
       - href: 00_methodological_framework.qmd
         text: Method
+
+      - text: Results
+        menu:
+          - href: 02_global_trends.qmd
+            text: Global trends
+          - href: 03_country_drivers.qmd
+            text: Country drivers
+          - href: 04_commodity_drivers.qmd
+            text: Commodity drivers
+          - href: 05_maps.qmd
+            text: Interactive maps
+          - href: 06_regional_regressions.qmd
+            text: Regional regressions
+
       - href: 01_processing_status.qmd
-        text: Processing status
-      - href: 02_global_trends.qmd
-        text: Global trends
-      - href: 03_country_drivers.qmd
-        text: Country drivers
-      - href: 04_commodity_drivers.qmd
-        text: Commodity drivers
-      - href: 05_maps.qmd
-        text: Maps
-      - href: 06_regional_regressions.qmd
-        text: Regional regressions
+        text: Data coverage
+
+    right:
+      - icon: github
+        href: https://github.com/sh33caqo/bf-nee-diagnostics
+        aria-label: GitHub repository
+
+  sidebar:
+    style: floating
+    search: true
+
+    contents:
+      - section: "Project"
+        contents:
+          - href: index.qmd
+            text: Overview
+          - href: 00_methodological_framework.qmd
+            text: Methodological framework
+          - href: 01_processing_status.qmd
+            text: Processing status
+
+      - section: "Results"
+        contents:
+          - href: 02_global_trends.qmd
+            text: Global trends
+          - href: 03_country_drivers.qmd
+            text: Country drivers
+          - href: 04_commodity_drivers.qmd
+            text: Commodity drivers
+          - href: 05_maps.qmd
+            text: Interactive maps
+          - href: 06_regional_regressions.qmd
+            text: Regional regressions
+
+  page-footer:
+    left: |
+      BF-NEE Diagnostics
+    center: |
+      Biodiversity-footprint-adjusted natural ecosystem loss
+    right: |
+      Built with Quarto and R
 
 format:
   html:
-    theme: cosmo
+    theme:
+      light: cosmo
+      dark: darkly
+
+    css: styles.css
+
     toc: true
+    toc-depth: 3
+    toc-location: right
+
     code-fold: true
+    code-summary: "Show code"
     code-tools: true
+    code-copy: true
+
+    smooth-scroll: true
+    link-external-newwindow: true
+
+    fig-responsive: true
+    df-print: paged
+
+execute:
+  freeze: auto
+  warning: false
+  message: false

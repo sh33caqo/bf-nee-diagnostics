@@ -1,0 +1,232 @@
+/* -------------------------------------------------------
+   Global appearance
+------------------------------------------------------- */
+
+:root {
+  --bfnee-primary: #1f5c4a;
+  --bfnee-primary-dark: #174638;
+  --bfnee-accent: #d99b3d;
+  --bfnee-light: #f4f8f6;
+  --bfnee-border: #d8e2dd;
+  --bfnee-text-muted: #607168;
+}
+
+body {
+  line-height: 1.65;
+}
+
+main {
+  max-width: 1400px;
+}
+
+/* -------------------------------------------------------
+   Navbar
+------------------------------------------------------- */
+
+.navbar {
+  background-color: var(--bfnee-primary) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.navbar-nav .nav-link {
+  font-weight: 500;
+}
+
+/* -------------------------------------------------------
+   Titles and headings
+------------------------------------------------------- */
+
+h1,
+h2,
+h3 {
+  font-weight: 650;
+}
+
+h1 {
+  color: var(--bfnee-primary-dark);
+}
+
+h2 {
+  border-bottom: 1px solid var(--bfnee-border);
+  padding-bottom: 0.35rem;
+  margin-top: 2.3rem;
+}
+
+/* -------------------------------------------------------
+   Hero section
+------------------------------------------------------- */
+
+.hero {
+  padding: 3.5rem 3rem;
+  margin-bottom: 2rem;
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(31, 92, 74, 0.98),
+      rgba(44, 114, 91, 0.9)
+    );
+
+  color: white;
+  box-shadow: 0 12px 30px rgba(20, 61, 49, 0.18);
+}
+
+.hero h1 {
+  color: white;
+  font-size: 2.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.hero p {
+  font-size: 1.15rem;
+  max-width: 900px;
+  margin-bottom: 0;
+  opacity: 0.95;
+}
+
+/* -------------------------------------------------------
+   Metric cards
+------------------------------------------------------- */
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(190px, 1fr)
+  );
+  gap: 1rem;
+  margin: 1.7rem 0 2.2rem 0;
+}
+
+.metric-card {
+  background: var(--bfnee-light);
+  border: 1px solid var(--bfnee-border);
+  border-radius: 14px;
+  padding: 1.25rem 1.35rem;
+  box-shadow: 0 4px 14px rgba(20, 61, 49, 0.06);
+}
+
+.metric-value {
+  font-size: 2rem;
+  line-height: 1.1;
+  font-weight: 750;
+  color: var(--bfnee-primary);
+}
+
+.metric-label {
+  margin-top: 0.45rem;
+  color: var(--bfnee-text-muted);
+  font-size: 0.95rem;
+}
+
+/* -------------------------------------------------------
+   Navigation cards
+------------------------------------------------------- */
+
+.page-card-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(260px, 1fr)
+  );
+  gap: 1.2rem;
+  margin: 1.5rem 0 2rem 0;
+}
+
+.page-card {
+  display: block;
+  border: 1px solid var(--bfnee-border);
+  border-radius: 14px;
+  padding: 1.35rem;
+  background: white;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.page-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--bfnee-primary);
+  box-shadow: 0 10px 24px rgba(20, 61, 49, 0.12);
+}
+
+.page-card h3 {
+  margin-top: 0;
+  color: var(--bfnee-primary);
+}
+
+.page-card p {
+  margin-bottom: 0;
+  color: var(--bfnee-text-muted);
+}
+
+/* -------------------------------------------------------
+   Tables
+------------------------------------------------------- */
+
+table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dataTables_wrapper {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* -------------------------------------------------------
+   Figures and widgets
+------------------------------------------------------- */
+
+.figure {
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.html-widget {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* -------------------------------------------------------
+   Callout-style section
+------------------------------------------------------- */
+
+.analysis-note {
+  border-left: 5px solid var(--bfnee-accent);
+  background: #fff8ec;
+  padding: 1rem 1.2rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+/* -------------------------------------------------------
+   Dark mode adjustments
+------------------------------------------------------- */
+
+.quarto-dark .page-card {
+  background: #22272b;
+  border-color: #3f4b46;
+}
+
+.quarto-dark .metric-card {
+  background: #222d29;
+  border-color: #3f4b46;
+}
+
+.quarto-dark h1 {
+  color: #d8eee6;
+}
+
+.quarto-dark .analysis-note {
+  background: #3a3020;
+}

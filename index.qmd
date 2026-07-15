@@ -1,48 +1,46 @@
 ---
-title: "BF-NEE Diagnostics"
+title: false
+page-layout: full
+toc: false
 ---
 
-# Biodiversity Footprint of Natural Ecosystem Extent (BF-NEE)
+```{r}
+#| include: false
 
-This website provides exploratory analyses and diagnostic checks for the BF-NEE indicator.
+library(dplyr)
+library(readr)
 
-The indicator links agricultural land expansion from LandSHIFT with ecosystem extent information from GlobES and attributes resulting ecosystem loss to commodity consumption.
+f_valid <- file.path(
+  "~/Symobio/Data/Processed/BF_NEE_Diagnostics",
+  "bfnee_valid_countries.csv"
+)
 
-## Objectives
+f_diag <- file.path(
+  "~/Symobio/Data/Processed/BF_NEE_Diagnostics",
+  "bfnee_country_diagnostics_all_transitions.csv"
+)
 
-The diagnostics focus on:
+valid <- read_csv(
+  f_valid,
+  show_col_types = FALSE
+)
 
-- Global BF-NEE trends over time
-- Main drivers of the global footprint
-- Germany's contribution to natural ecosystem displacement
-- Spatial hotspot analysis
-- Consistency checks between BF-NEE and GlobES ecosystem loss
-- Data quality and processing diagnostics
+diag <- read_csv(
+  f_diag,
+  show_col_types = FALSE
+)
 
-## Available analyses
+n_valid <- valid %>%
+  filter(valid_for_analysis) %>%
+  summarise(n = n_distinct(iso3)) %>%
+  pull(n)
 
-### Processing status
+n_processed <- valid %>%
+  summarise(n = n_distinct(iso3)) %>%
+  pull(n)
 
-Country-level diagnostics and identification of outputs that were generated using outdated scaling assumptions.
+n_transitions <- diag %>%
+  summarise(n = n_distinct(transition)) %>%
+  pull(n)
 
-### Global trends
-
-Development of BF-NEE between 1995 and 2015.
-
-### Country drivers
-
-Identification of countries contributing most strongly to global BF-NEE.
-
-### Commodity drivers
-
-Identification of agricultural commodities contributing most strongly to ecosystem displacement.
-
-### Maps
-
-Spatial distribution of BF-NEE and natural ecosystem loss.
-
-## Current status
-
-Analyses currently use only countries that passed the processing and scale diagnostics.
-
-Countries that still contain outputs generated prior to the cell-area correction are excluded until recalculated.
+n_outputs <- nrow(diag)
