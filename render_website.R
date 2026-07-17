@@ -4,7 +4,6 @@ project_dir <- "~/Symobio/BF_NEE_Diagnostics_Website"
 
 setwd(project_dir)
 
-# Optional: check files exist
 required_pages <- c(
   "index.qmd",
   "00_methodological_framework.qmd",
@@ -20,13 +19,13 @@ required_pages <- c(
 missing <- required_pages[!file.exists(required_pages)]
 
 if (length(missing) > 0) {
-  stop("Missing files: ", paste(missing, collapse = ", "))
+  stop(
+    "Missing files: ",
+    paste(missing, collapse = ", ")
+  )
 }
 
-# Render complete website, not single page
-system2(
-  "quarto",
-  args = c("render", project_dir),
-  stdout = TRUE,
-  stderr = TRUE
+system(
+  "quarto render",
+  intern = FALSE
 )
