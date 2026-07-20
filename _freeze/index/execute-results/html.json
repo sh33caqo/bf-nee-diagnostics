@@ -1,0 +1,19 @@
+{
+  "hash": "284523e5fc542a1beb6bde6c34090a5a",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"\"\npage-layout: full\ntoc: false\n---\n\n\n\n\n\n::: {.hero-section}\n\n# BF-NEE Diagnostics\n\n## Biodiversity-footprint-adjusted natural ecosystem loss\n\nExplore global and country-level patterns of biodiversity-footprint-adjusted\nnatural ecosystem loss, commodity attribution and diagnostic outputs.\n\n::: {.hero-actions}\n\n[Explore results](02_global_trends.qmd){.btn .btn-primary .btn-lg}\n\n[View data coverage](01_processing_status.qmd){.btn .btn-outline-primary .btn-lg}\n\n:::\n\n:::\n\n::: {.metric-grid}\n\n::: {.metric-card}\n\n### 155\n\n**Countries processed**\n\n:::\n\n::: {.metric-card}\n\n### 155\n\n**Countries valid for analysis**\n\n:::\n\n::: {.metric-card}\n\n### 4\n\n**Time periods**\n\n:::\n\n::: {.metric-card}\n\n### 620\n\n**Diagnostic records**\n\n:::\n\n:::\n\n## Explore the diagnostics\n\n::: {.feature-grid}\n\n::: {.feature-card}\n\n### Methodological framework\n\nDocumentation of the BF-NEE workflow.\n\n[Open methodology →](00_methodological_framework.qmd)\n\n:::\n\n::: {.feature-card}\n\n### Global trends\n\nExplore global BF-NEE patterns.\n\n[Open global trends →](02_global_trends.qmd)\n\n:::\n\n::: {.feature-card}\n\n### Country drivers\n\nCompare country-level results.\n\n[Open country drivers →](03_country_drivers.qmd)\n\n:::\n\n::: {.feature-card}\n\n### Commodity drivers\n\nInvestigate commodity contributions.\n\n[Open commodity drivers →](04_commodity_drivers.qmd)\n\n:::\n\n::: {.feature-card}\n\n### Interactive maps\n\nExplore BF-NEE spatially.\n\n[Open maps →](05_maps.qmd)\n\n:::\n\n::: {.feature-card}\n\n### Regional regressions\n\nRegional statistical analyses.\n\n[Open regressions →](06_regional_regressions.qmd)\n\n:::\n\n:::\n\n## About BF-NEE\n\nThe BF-NEE diagnostics combine natural ecosystem loss, commodity attribution\nweights and biodiversity-footprint information to quantify biodiversity-\nfootprint-adjusted natural ecosystem loss across countries and time periods.\n\nThe website provides access to the complete diagnostics workflow, summary\nstatistics, spatial products and supporting analyses.",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {
+      "include-in-header": [
+        "<link href=\"site_libs/pagedtable-1.1/css/pagedtable.css\" rel=\"stylesheet\" />\n<script src=\"site_libs/pagedtable-1.1/js/pagedtable.js\"></script>\n"
+      ]
+    },
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -5,7 +5,10 @@ toc: false
 ---
 
 ```{r}
+#| label: setup
 #| include: false
+#| warning: false
+#| message: false
 
 library(dplyr)
 library(readr)
@@ -44,3 +47,134 @@ n_transitions <- diag %>%
   pull(n)
 
 n_outputs <- nrow(diag)
+```
+
+::: {.hero-section}
+
+# BF-NEE Diagnostics
+
+## Biodiversity-footprint-adjusted natural ecosystem loss
+
+Explore global and country-level patterns of biodiversity-footprint-adjusted
+natural ecosystem loss, commodity attribution and diagnostic outputs.
+
+::: {.hero-actions}
+
+[Explore results](02_global_trends.qmd){.btn .btn-primary .btn-lg}
+
+[View data coverage](01_processing_status.qmd){.btn .btn-outline-primary .btn-lg}
+
+:::
+
+:::
+
+::: {.metric-grid}
+
+::: {.metric-card}
+
+### `r n_processed`
+
+**Countries processed**
+
+:::
+
+::: {.metric-card}
+
+### `r n_valid`
+
+**Countries valid for analysis**
+
+:::
+
+::: {.metric-card}
+
+### `r n_transitions`
+
+**Time periods**
+
+:::
+
+::: {.metric-card}
+
+### `r format(n_outputs, big.mark = ",")`
+
+**Diagnostic records**
+
+:::
+
+:::
+
+## Explore the diagnostics
+
+::: {.feature-grid}
+
+::: {.feature-card}
+
+### Methodological framework
+
+Documentation of the BF-NEE workflow.
+
+[Open methodology →](00_methodological_framework.qmd)
+
+:::
+
+::: {.feature-card}
+
+### Global trends
+
+Explore global BF-NEE patterns.
+
+[Open global trends →](02_global_trends.qmd)
+
+:::
+
+::: {.feature-card}
+
+### Country drivers
+
+Compare country-level results.
+
+[Open country drivers →](03_country_drivers.qmd)
+
+:::
+
+::: {.feature-card}
+
+### Commodity drivers
+
+Investigate commodity contributions.
+
+[Open commodity drivers →](04_commodity_drivers.qmd)
+
+:::
+
+::: {.feature-card}
+
+### Interactive maps
+
+Explore BF-NEE spatially.
+
+[Open maps →](05_maps.qmd)
+
+:::
+
+::: {.feature-card}
+
+### Regional regressions
+
+Regional statistical analyses.
+
+[Open regressions →](06_regional_regressions.qmd)
+
+:::
+
+:::
+
+## About BF-NEE
+
+The BF-NEE diagnostics combine natural ecosystem loss, commodity attribution
+weights and biodiversity-footprint information to quantify biodiversity-
+footprint-adjusted natural ecosystem loss across countries and time periods.
+
+The website provides access to the complete diagnostics workflow, summary
+statistics, spatial products and supporting analyses.

@@ -13,9 +13,6 @@ website:
     pinned: true
 
     left:
-      - href: index.qmd
-        text: Overview
-
       - href: 00_methodological_framework.qmd
         text: Method
 
@@ -47,8 +44,6 @@ website:
     contents:
       - section: "Project"
         contents:
-          - href: index.qmd
-            text: Overview
           - href: 00_methodological_framework.qmd
             text: Methodological framework
           - href: 01_processing_status.qmd
